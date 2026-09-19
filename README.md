@@ -48,8 +48,11 @@ After training our NER model on this hybrid dataset for 20 epochs, we achieved s
 To run on an Android device without internet, Hugging Face PyTorch weights (`.safetensors`) are too heavy and slow. 
 
 We provide an automated export script (`scripts/export_onnx.py`) that converts the models to the universal **ONNX format**.
-To make the models even faster for mobile processors, the script automatically applies **INT8 Dynamic Quantization** to the NER model. This shrinks the NER model from ~90MB down to just **~22MB**, ensuring it loads instantly and saves battery life.
+To make the models even faster for mobile processors, the script automatically applies **INT8 Dynamic Quantization** to the NER model. This shrinks the NER model from ~87MB down to just **~22MB**, ensuring it loads instantly and saves battery life.
 
+- **`model.safetensors`** (Standard PyTorch Model): **87 MB**
+- **`model.onnx`** (Standard FP32 ONNX Model): **87 MB**
+- **`model_quantized.onnx`** (INT8 Quantized ONNX Model): **22 MB**
 These models are plug-and-play ready for `onnxruntime-android`.
 
 ---
