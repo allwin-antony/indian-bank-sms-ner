@@ -64,7 +64,13 @@ def tokenize_and_align_labels(examples, tokenizer):
             elif word_idx != previous_word_idx:
                 label_ids.append(label[word_idx])
             else:
-                label_ids.append(-100)
+                # Propagate label to continuation subwords
+                # B-tag is odd index, I-tag is even index (B-AMOUNT=1, I-AMOUNT=2)
+                parent_label = label[word_idx]
+                if parent_label % 2 == 1:
+                    label_ids.append(parent_label + 1)
+                else:
+                    label_ids.append(parent_label)
             previous_word_idx = word_idx
         labels.append(label_ids)
 

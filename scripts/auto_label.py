@@ -65,14 +65,17 @@ def auto_label(sms_body: str) -> Tuple[List[str], List[str]]:
     
     # Find BALANCE
     balance_match = None
-    # Check "BAL-Rs.X" or "Avl bal INR" or "Available bal: INR"
+    # Check "BAL-Rs.X" or "Avl bal INR" or "Available bal: INR" or "balance is Rs."
     bal_match_1 = re.search(r'(?i)BAL\s*[-:]?\s*(?:Rs\.?|INR)\s*([\d,]+\.?\d*)', body)
     bal_match_2 = re.search(r'(?i)(?:Avl|Available)\s*bal(?:ance)?[:\s-]*(?:Rs\.?|INR)?\s*([\d,]+\.?\d*)', body)
+    bal_match_3 = re.search(r'(?i)balance\s+(?:is|:)\s*(?:Rs\.?|INR)?\s*([\d,]+\.?\d*)', body)
     
     if bal_match_1:
         balance_match = bal_match_1
     elif bal_match_2:
         balance_match = bal_match_2
+    elif bal_match_3:
+        balance_match = bal_match_3
         
     if balance_match:
         spans.append((balance_match.start(1), balance_match.end(1), 'BALANCE'))
@@ -93,6 +96,8 @@ def auto_label(sms_body: str) -> Tuple[List[str], List[str]]:
         spans.append((match.start(1), match.end(1), 'ACCOUNT'))
     for match in re.finditer(r'(?i)XX(\d{4})', body):
         spans.append((match.start(1), match.end(1), 'ACCOUNT'))
+    for match in re.finditer(r'\*\*(\d{4})', body):
+        spans.append((match.start(1), match.end(1), 'ACCOUNT'))
         
     # PAY_MODE
     for match in re.finditer(r'(?i)\b(UPI|ECOM Txn|POS Txn|NEFT|IMPS|ATM|card)\b', body):
@@ -112,6 +117,12 @@ def auto_label(sms_body: str) -> Tuple[List[str], List[str]]:
     neft_cr = re.search(r'(?i)NEFT Cr-[A-Z0-9]+-([A-Z0-9\s]+)-', body)
     if neft_cr:
         spans.append((neft_cr.start(1), neft_cr.end(1), 'MERCHANT'))
+        
+    # General merchant pattern "to Swiggy using" or "at Amazon for"
+    # Match non-greedily until a stop word
+    general_merch = re.search(r'(?i)(?:to|at|for)\s+([A-Za-z0-9\s&\.\-]+?)(?:\s+(?:using|on|via|is|at)\b)', body)
+    if general_merch:
+        spans.append((general_merch.start(1), general_merch.end(1), 'MERCHANT'))
 
     # 3. Tokenize
     # A very simple regex tokenizer
