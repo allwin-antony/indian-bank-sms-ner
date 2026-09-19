@@ -1,0 +1,11 @@
+torch>=2.0.0
+transformers>=4.30.0
+datasets>=2.10.0
+seqeval>=1.2.2
+onnx>=1.14.0
+onnxruntime>=1.15.0
+lxml>=4.9.0
+pandas>=2.0.0
+beautifulsoup4>=4.11.0
+scikit-learn>=1.2.0
+accelerate>=1.1.0
